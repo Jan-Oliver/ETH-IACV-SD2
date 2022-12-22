@@ -6,7 +6,6 @@ import random
 import json
 import math
 import os
-import wandb
 from contextlib import nullcontext
 from pathlib import Path
 from typing import Optional
@@ -249,18 +248,6 @@ def parse_args(input_args=None):
         default=None,
         help="Path to json containing multiple concepts, will overwrite parameters like instance_prompt, class_prompt, etc.",
     )
-    parser.add_argument(
-        "--wandb_group_name",
-        type=str,
-        default=None,
-        help="Group name to combine multiple wandb processes in the GUI."
-    )
-    parser.add_argument(
-        "--wandb_project_name",
-        type=str,
-        default=None,
-        help="Project name to combine multiple wandb processes in the GUI."
-    )
     if input_args is not None:
         args = parser.parse_args(input_args)
     else:
@@ -408,15 +395,12 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
 
 
 def main(args):
-    run = wandb.init(project=args.wandb_project_name, group=args.wandb_group_name, job_type="train")
-    wandb.config.update(args)
-
     logging_dir = Path(args.output_dir, "0", args.logging_dir)
 
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
-        log_with="wandb",
+        log_with="tensorboard",
         logging_dir=logging_dir,
     )
 
